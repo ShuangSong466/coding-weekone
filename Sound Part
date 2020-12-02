@@ -1,0 +1,88 @@
+<html>
+
+<head>
+ <script src = "https://mimicproject.com/libs/maximilian.js"></script>
+
+</head>
+
+<body>
+    <canvas></canvas>
+
+    <!-- Our javascript code -->
+    <script type="text/javascript">
+        var drawOutput = new Array(1024);
+        var counter = 0;
+		var maximJs = maximilian();
+        var audio = new maximJs.maxiAudio();      
+      	var myOsc = new maximJs.maxiOsc();
+        var myOsc2 = new maximJs.maxiOsc();
+      	var myOsc3 = new maximJs.maxiOsc();
+        var myOsc4 = new maximJs.maxiOsc();
+       	// var mySettings = new maximJs.maxiSettings();
+        audio.init();
+      // The below needs to be set to the samplerate of your audio card, default is 44100 !
+      	// mySettings.sampleRate=44100;
+      
+        audio.play = function() {
+
+            counter++;
+// to perceptually freeze the signal we divide the sampling rate by the buffer size and 
+// use this as frequency
+          
+          var s0 = myOsc.sinewave(30);
+          var s1 = myOsc2.sinewave(2);
+          var s2 = myOsc2.coswave(200)*0.2;
+          var s3 = myOsc.coswave(Math.random()*0.1- 0.5);
+          var s4 = myOsc2.coswave(40);
+          var delayTime = ((120/60*44100)/6)*3;
+          
+          var sum = (s0+s1)/5*s4 + s3;
+          
+          
+          
+//             var sum = myOsc.sinewave(290 + myOsc2.sinewave(29) * 200)* myOsc2.sinewave(0.06)*0.3+ myOsc3.sinewave(100 + myOsc2.sinewave(29)*5)*myOsc4.sinewave(0.22) + myOsc3.sinewave(150)*0.3 + myOsc3.sinewave(200)*0.025;
+// but this only works if the refresh rate is reliable
+// which depends on your browser
+            var out = sum * 0.2;
+            
+            drawOutput[counter % 1024] = out;
+return out;
+        };
+
+
+
+        var canvas = document.querySelector("canvas");
+        var width = window.innerWidth;
+        var height = window.innerHeight;
+        var context = canvas.getContext("2d");
+
+        canvas.setAttribute("width", width);
+        canvas.setAttribute("height", height);
+
+        var spacing = (width / 1024);
+
+        function draw() {
+
+            //This is basically the same as any other 2D processing draw routine.
+
+            //clear the screen
+            context.clearRect(0, 0, width, height);
+            //draw a square	
+
+
+            for (var i = 0; i < 1024; i++) {
+                context.beginPath();
+                context.moveTo(i * spacing, height / 2);
+                context.lineTo(i * spacing, height / 2 + (drawOutput[i] * height / 4));
+                context.stroke();
+                context.closePath();
+            }
+          requestAnimationFrame(draw);
+        }
+
+        requestAnimationFrame(draw);
+    </script>
+
+</body>
+
+</html>
